@@ -1,0 +1,20 @@
+# Virtual environments
+venv*/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Streamlit and editor
+.streamlit/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled / distribution
+build/
+dist/
+*.egg-info/
