@@ -223,5 +223,65 @@
     "category": "Marketing",
     "provider": "Meta Platforms",
     "description": "Facebook Pixel advertising first-party cookie. Used by Facebook to track visits across websites to deliver a series of advertisement products such as real time bidding from third party advertisers."
+  },
+  "_rdt_uuid": {
+    "category": "Marketing",
+    "provider": "Reddit, Inc.",
+    "description": "This cookie is set by the Reddit Pixel to store event match information. It helps Reddit attribute website actions to advertising campaigns and optimize ad delivery."
+  },
+  "_ttp": {
+    "category": "Marketing",
+    "provider": "TikTok Inc.",
+    "description": "Used by Tiktok to measure and improve the performance of advertising campaigns and to personalize the user's experience (including ads) on TikTok."
+  },
+  "_twpid": {
+    "category": "Uncategorized",
+    "provider": "Unknown",
+    "description": "No description available"
+  },
+  "_ym_d": {
+    "category": "Analytics",
+    "provider": "Yandex",
+    "description": "Used by Yandex.Metrika to save the date of the user's first site session"
+  },
+  "guest_id_marketing": {
+    "category": "Marketing",
+    "provider": "X Corp.",
+    "description": "Cookies set by Twitter/X to identify visitors, deliver embedded content, and measure or personalize advertising campaigns."
+  },
+  "guest_id_ads": {
+    "category": "Marketing",
+    "provider": "X Corp.",
+    "description": "Cookies set by Twitter/X to identify visitors, deliver embedded content, and measure or personalize advertising campaigns."
+  },
+  "personalization_id": {
+    "category": "Marketing",
+    "provider": "X Corp.",
+    "description": "This cookie carries out information about how the end user uses the website and any advertising that the end user may have seen before visiting the said website."
+  },
+  "yabs-sid": {
+    "category": "Marketing",
+    "provider": "Yandex",
+    "description": "This cookie is used by Yandex to record data on the behavior of the website visitor on the Website."
+  },
+  "YSC": {
+    "category": "Marketing",
+    "provider": "Google LLC",
+    "description": "This cookie is set by YouTube video service on pages with YouTube embedded videos to track views."
+  },
+  "VISITOR_INFO1_LIVE": {
+    "category": "Marketing",
+    "provider": "Google LLC",
+    "description": "Set by YouTube and used for various purposes, including analytical and advertising."
+  },
+  "VISITOR_PRIVACY_METADATA": {
+    "category": "Marketing",
+    "provider": "Google LLC",
+    "description": "Used by YouTube to store the user’s privacy and consent settings for embedded videos. It helps ensure that user privacy choices (like consent for personalized ads or tracking) are respected when watching embedded YouTube content."
+  },
+  "__Secure-ROLLOUT_TOKEN": {
+    "category": "Marketing",
+    "provider": "Google LLC",
+    "description": "Used by YouTube to manage feature rollout and experimentation. It helps Google control which new features or interface changes are shown to users as part of testing and staged rollouts, ensuring consistent experience for a given user during an experiment."
   }
 }
