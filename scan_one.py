@@ -18,7 +18,6 @@ CMP_SELECTORS = [
     ".qc-cmp2-summary-buttons button:first-child", "#didomi-notice-agree-button",
     ".truste-button1", "#ccc-notify-accept", ".cmplz-accept", ".iubenda-cs-accept-btn",
     ".ms-cookie-banner-button", "#accept-cookies", "#cookie-accept", ".accept-cookies-button",
-    # Часто встречающиеся новые:
     "button[id*='accept']", "button[class*='accept']", "a[class*='accept']"
 ]
 
@@ -34,7 +33,6 @@ ACCEPT_PATTERNS = [
 ]
 
 def handle_banner(page):
-    # (Ваша функция без изменений, она хорошая)
     def check_context(context, context_name="Main"):
         for selector in CMP_SELECTORS:
             try:
@@ -76,7 +74,6 @@ def handle_banner(page):
     return False
 
 def get_internal_links(page, base_domain, current_url):
-    # (Ваша функция без изменений)
     links_found = set()
     try:
         hrefs = page.evaluate("""() => {
@@ -95,14 +92,15 @@ def get_internal_links(page, base_domain, current_url):
         return set()
 
 def scan(start_url):
-    unique_cookies = {} 
+    unique_cookies = {}
+    unique_local_storage = set() # <--- ДОБАВИТЬ ЭТО (set поможет избежать дубликатов) 
     queue = [start_url]
     visited = set()
     base_domain = urlparse(start_url).netloc
     pages_scanned = 0
 
     with sync_playwright() as p:
-        # ### FIX 1: Маскировка под реального пользователя
+        #  Маскировка под реального пользователя
         # Отключаем флаги автоматизации Chrome
         browser = p.chromium.launch(
             headless=True, # Попробуйте False, если все равно не работает!
@@ -119,7 +117,7 @@ def scan(start_url):
             locale="en-US,en;q=0.9" # Некоторые сайты смотрят на локаль
         )
         
-        # ### FIX 2: Скрипт для удаления признаков webdriver
+        #  Скрипт для удаления признаков webdriver
         context.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
@@ -137,7 +135,7 @@ def scan(start_url):
                 pages_scanned += 1
                 
                 try:
-                    # ### FIX 3: WaitUntil = NetworkIdle
+                    #  WaitUntil = NetworkIdle
                     # Ждем, пока закончатся сетевые запросы (загрузятся скрипты аналитики)
                     # Если сайт слишком медленный, networkidle может отваливаться по таймауту, тогда используйте 'load'
                     try:
@@ -157,10 +155,14 @@ def scan(start_url):
                     current_cookies = context.cookies()
                     for c in current_cookies:
                         unique_cookies[c['name']] = c
-
-                    # ### FIX 4: Проверка LocalStorage (иногда данные там)
-                    local_storage_data = page.evaluate("() => JSON.stringify(localStorage)")
-                    # Если нужно, можно парсить и добавлять в результат
+                    # 5. Сбор LocalStorage
+                    try:
+                        # Берем только названия ключей, чтобы не тащить лишние данные
+                        ls_keys = page.evaluate("() => Object.keys(localStorage)")
+                        for key in ls_keys:
+                            unique_local_storage.add(key)
+                    except:
+                        pass
 
                     new_links = get_internal_links(page, base_domain, url)
                     for link in new_links:
@@ -173,6 +175,7 @@ def scan(start_url):
             return {
                 "url": start_url,
                 "cookies": list(unique_cookies.values()),
+                "local_storage": list(unique_local_storage),
                 "cookie_count": len(unique_cookies),
                 "pages_scanned": pages_scanned,
                 "visited_urls": list(visited)

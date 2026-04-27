@@ -6,6 +6,7 @@ import json
 import os
 import time
 from pathlib import Path
+#i scraped the lokal storage too but dont know what to do. Its ugly
 
 # Конфигурация страницы
 st.set_page_config(page_title="Cookie Policy Generator", layout="centered")
@@ -88,9 +89,17 @@ def classify_and_enrich_cookie(cookie: dict):
 
     cookie["category"] = cat
     cookie["provider"] = cookie.get("domain", "Unknown")
-    cookie["description"] = "No description available."
+    default_descriptions = {
+        "Necessary": "Essential cookie to ensure core website functionality and security.",
+        "Analytical": "Used to collect anonymous data on how visitors interact with the website.",
+        "Marketing": "Used to track visitors across websites to display relevant advertisements.",
+        "Preference": "Used to remember user settings and preferences (e.g., language or region).",
+        "Unclassified": "No description available. Pending classification."
+    }
+    
+    cookie["description"] = default_descriptions.get(cat, "No description available.")
 
-def generate_policy_text(site_name: str, cookies: list) -> str:
+def generate_policy_text(site_name: str, cookies: list, local_storage: list | None = None) -> str:
     last_updated = date.today().strftime("%d.%m.%Y")
     
     def get_expiry_str(timestamp):
@@ -187,7 +196,6 @@ def generate_policy_text(site_name: str, cookies: list) -> str:
     lines.append("")
     lines.append("### Third-Party Cookies")
     lines.append(create_cookie_table(third_party))
-
     lines.append("")
     lines.append("## How can I control cookies?")
     lines.append("You have the right to decide whether to accept or reject specific types of cookies (except of strictly necessary cookies). You can exercise your cookie preferences on the cookie banner.")
@@ -223,6 +231,14 @@ if st.button("Generate Policy"):
 
     cookies = data.get("cookies", [])
     st.info(f"Сканирование завершено. Найдено cookies: {len(cookies)}")
+    local_storage = data.get("local_storage", [])
+
+    with st.spinner("🧠 Генерируем политику..."):
+        progress_bar = st.progress(0)
+        for i, c in enumerate(cookies):
+            classify_and_enrich_cookie(c)
+            progress_bar.progress((i + 1) / len(cookies))
+        progress_bar.empty()
 
     with st.spinner("🧠 Генерируем политику..."):
         progress_bar = st.progress(0)
@@ -231,7 +247,7 @@ if st.button("Generate Policy"):
             progress_bar.progress((i + 1) / len(cookies))
         progress_bar.empty()
             
-    policy_md = generate_policy_text(url, cookies)
+    policy_md = generate_policy_text(url, cookies, local_storage)
 
     st.success("✅ Политика готова!")
     
