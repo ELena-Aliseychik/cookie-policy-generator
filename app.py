@@ -9,9 +9,11 @@ from pathlib import Path
 #i scraped the lokal storage too but dont know what to do. Its ugly
 
 # Конфигурация страницы
+# Page configuration
 st.set_page_config(page_title="Cookie Policy Generator", layout="centered")
 
 # --- КОНСТАНТЫ И БАЗА ДАННЫХ ---
+# --- CONSTANTS AND DATABASE ---
 DB_FILE = Path(__file__).parent / "cookie_db.json"
 
 if DB_FILE.exists():
@@ -25,6 +27,7 @@ def save_db():
         json.dump(COOKIE_DB, f, indent=2, ensure_ascii=False)
 
 # --- ВНЕШНИЕ СКРИПТЫ ---
+# --- EXTERNAL SCRIPTS ---
 
 def scan_site(url: str) -> dict:
     script = Path(__file__).with_name("scan_one.py")
@@ -119,6 +122,7 @@ def generate_policy_text(site_name: str, cookies: list, local_storage: list | No
             return f"{int(years)} year(s)" if years.is_integer() else f"{years} years"
 
     # Функция для создания Markdown таблицы (ИСПРАВЛЕНО)
+    # Function to create a Markdown table (FIXED)
     def create_cookie_table(cookie_list):
         if not cookie_list:
             return "_No cookies found in this category._"
@@ -135,11 +139,13 @@ def generate_policy_text(site_name: str, cookies: list, local_storage: list | No
             expiry = get_expiry_str(c.get("expires"))
             
             # Очистка
+            # Cleanup
             desc = desc.replace("\n", " ").replace("|", "/").strip()
             name = name.replace("|", "")
             domain = domain.replace("|", "")
             
             # Если имя очень длинное, можно его обрезать или разбить, но обычно куки короткие.
+            # If the name is very long, you can trim or split it, but cookies are usually short.
             row = f"| **{name}** | {ctype} | {domain} | {expiry} | {desc} |"
             table_lines.append(row)
             
@@ -208,10 +214,12 @@ def generate_policy_text(site_name: str, cookies: list, local_storage: list | No
     return "\n".join(lines)
 
 # --- ИНТЕРФЕЙС ---
+# --- INTERFACE ---
 
 st.title("🍪 Cookie Policy Generator")
 st.markdown(
     "Введите URL сайта. Приложение просканирует сайт (глубина - до 15 вкладок) и сгенерирует полный текст Политики cookies. Не забудьте сверить результат техническими специалистами."
+    # Enter the site URL. The app will scan the site (depth - up to 15 tabs) and generate the full Cookie Policy text. Don't forget to check the result with technical specialists.
 )
 
 url = st.text_input("URL сайта (с https://):", "https://example.com")
@@ -223,6 +231,7 @@ if st.button("Generate Policy"):
     
     data = None
     with st.spinner("🕵️ Сканируем сайт, переходим по страницам, соглашаемся на баннеры и ищем куки... Это займет время."):
+        # Scanning the site, navigating pages, accepting banners, and searching for cookies... This will take some time.
         try:
             data = scan_site(url)
         except Exception as e:
@@ -231,9 +240,11 @@ if st.button("Generate Policy"):
 
     cookies = data.get("cookies", [])
     st.info(f"Сканирование завершено. Найдено cookies: {len(cookies)}")
+    # Scan complete. Cookies found: {len(cookies)}
     local_storage = data.get("local_storage", [])
 
     with st.spinner("🧠 Генерируем политику..."):
+        # Generating policy...
         progress_bar = st.progress(0)
         for i, c in enumerate(cookies):
             classify_and_enrich_cookie(c)
@@ -241,6 +252,7 @@ if st.button("Generate Policy"):
         progress_bar.empty()
 
     with st.spinner("🧠 Генерируем политику..."):
+        # Generating policy...
         progress_bar = st.progress(0)
         for i, c in enumerate(cookies):
             classify_and_enrich_cookie(c)
@@ -250,6 +262,7 @@ if st.button("Generate Policy"):
     policy_md = generate_policy_text(url, cookies, local_storage)
 
     st.success("✅ Политика готова!")
+    # Policy is ready!
     
     st.subheader("📜 Generated Policy Document")
     st.markdown("---")
@@ -262,3 +275,4 @@ if st.button("Generate Policy"):
         file_name="cookie_policy.md",
         mime="text/markdown"
     )
+    # Download as .md file

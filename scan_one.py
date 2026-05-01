@@ -6,8 +6,10 @@ from urllib.parse import urlparse
 import re
 
 # --- НАСТРОЙКИ ---
+# --- SETTINGS ---
 MAX_PAGES_TO_SCAN = 30
 # ### FIX: Добавили задержку перед сбором кук, чтобы JS успел отработать
+# ### FIX: Added a delay before collecting cookies to let JS execute
 COOKIE_WAIT_TIME = 3 
 
 CMP_SELECTORS = [
@@ -94,6 +96,7 @@ def get_internal_links(page, base_domain, current_url):
 def scan(start_url):
     unique_cookies = {}
     unique_local_storage = set() # <--- ДОБАВИТЬ ЭТО (set поможет избежать дубликатов) 
+    # <--- ADD THIS (set helps avoid duplicates)
     queue = [start_url]
     visited = set()
     base_domain = urlparse(start_url).netloc
@@ -101,7 +104,9 @@ def scan(start_url):
 
     with sync_playwright() as p:
         #  Маскировка под реального пользователя
+        #  Masking as a real user
         # Отключаем флаги автоматизации Chrome
+        # Disabling Chrome automation flags
         browser = p.chromium.launch(
             headless=True, # Попробуйте False, если все равно не работает!
             args=[
@@ -118,6 +123,7 @@ def scan(start_url):
         )
         
         #  Скрипт для удаления признаков webdriver
+        #  Script to remove webdriver traces
         context.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
@@ -136,28 +142,34 @@ def scan(start_url):
                 
                 try:
                     #  WaitUntil = NetworkIdle
-                    # Ждем, пока закончатся сетевые запросы (загрузятся скрипты аналитики)
-                    # Если сайт слишком медленный, networkidle может отваливаться по таймауту, тогда используйте 'load'
+                    # Waiting for network requests to finish (analytics scripts to load)
+                    # If the site is too slow, networkidle may timeout, then use 'load'
                     try:
                         page.goto(url, wait_until="networkidle", timeout=30000)
                     except:
                         # Если networkidle не сработал за 30 сек, пробуем просто domcontentloaded
+                        # If networkidle doesn't work in 30 sec, try just domcontentloaded
                         page.goto(url, wait_until="domcontentloaded", timeout=30000)
 
                     if pages_scanned <= 3:
                         handle_banner(page)
 
                     # Скролл
+                    # Scroll
                     page.mouse.wheel(0, 3000)
                     time.sleep(COOKIE_WAIT_TIME) # Даем время скриптам поставить куки
+                    # Give scripts time to set cookies
                     
                     # 4. Сбор куки
+                    # 4. Collect cookies
                     current_cookies = context.cookies()
                     for c in current_cookies:
                         unique_cookies[c['name']] = c
                     # 5. Сбор LocalStorage
+                    # 5. Collect LocalStorage
                     try:
                         # Берем только названия ключей, чтобы не тащить лишние данные
+                        # Only take the names of the keys to avoid pulling unnecessary data
                         ls_keys = page.evaluate("() => Object.keys(localStorage)")
                         for key in ls_keys:
                             unique_local_storage.add(key)
