@@ -181,6 +181,9 @@ def scan(start_url):
                         if link not in visited and link not in queue:
                             queue.append(link)
                     
+                    del new_links  # Освобождаем память от найденных ссылок
+                    # TODO: Ask AI if you could do some garbage collection here to free memory after processing each page, especially if the site has many links.
+
                 except Exception as e:
                     print(f"Error scanning {url}: {e}", file=sys.stderr)
 
